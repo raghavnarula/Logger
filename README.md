@@ -7,7 +7,7 @@ Only Blocker is the usb drive that I am working on.. it's literally an 8$ USB dr
 ## Roadmap Overview
 
 - [x] V1: Buffered Streams
-- [ ] V2: Synchronous O_SYNC
+- [x] V2: Synchronous O_SYNC
 - [ ] V3: Mutex Queues
 - [ ] V4: Vectorized writev
 - [ ] V5: O_DIRECT Bypass
@@ -31,7 +31,7 @@ Only Blocker is the usb drive that I am working on.. it's literally an 8$ USB dr
 * **Objective:** Eliminate page-cache masking by enforcing that write operations block until data is physically committed to storage media.
 * **Implementation:** Transition from streams to POSIX file descriptors (`open()`) using the `O_SYNC` flag or issuing manual `fsync(fd)` calls.
 * **System Characteristics:** Application execution is throttled by actual physical storage latency (e.g., USB flash or disk controller speed).
-* **Verification:** Verify `/proc/meminfo` `Dirty` metric remains flat at 0 kB and `iostat` shows continuous write throughput.
+* **Verification:** Verify `/proc/meminfo` `Dirty` metric would rise a lot and also the Writeback (as we are throttled by USB flash slowness ) and `iostat` shows continuous write throughput.
 
 ### V3: Thread-Safe Multi-Producer Logging (Mutex Queues)
 * **Objective:** Allow multiple concurrent threads to submit logs safely without file corruption or race conditions.
