@@ -7,16 +7,47 @@
 LogGenerator::LogGenerator(std::string fileName)
 {
     _fileName = fileName;
-    logFile_.open(_fileName, std::ios::app);
+    _fd = open(_fileName.c_str(),O_WRONLY | O_CREAT | O_APPEND | O_SYNC,0644);
+    if (_fd == -1){
+        std::cout << "File Not Found";
+        return;
+    }
+
+}
+
+LogGenerator::~LogGenerator() {
+    if (_fd != -1) {
+        close(_fd);
+    }
 }
 
 void LogGenerator::writeLog() {
-    std::string randomString = randomStringGenerator(10000000);
-    logFile_ << randomString << std::endl;
+    long int bytesSize = 10000000000; // 10GB 
+    std::string randomString = randomStringGenerator(bytesSize);
+    
+    long int totalBytesWritten = 0;
+    
+    while (totalBytesWritten < static_cast<long int>(randomString.length())) {
+        
+        long int bytesRemaining = randomString.length() - totalBytesWritten;
+
+        ssize_t bytesWritten = write(_fd, randomString.c_str() + totalBytesWritten, bytesRemaining);
+        
+        if (bytesWritten == -1) {
+            std::cout << "Failed to Write" << std::endl;
+            break; // Exit loop on a fatal write error
+        }
+        
+        totalBytesWritten += bytesWritten;
+        std::cout << "Successfully wrote total of " << bytesWritten << " bytes.\n";
+    } 
+    
+    std::cout << "Finished! Successfully wrote total of " << totalBytesWritten << " bytes.\n";
     return;
 }
 
-std::string LogGenerator::randomStringGenerator(int _stringLength) {
+
+std::string LogGenerator::randomStringGenerator(size_t _stringLength) {
     static constexpr std::string_view characters = 
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
