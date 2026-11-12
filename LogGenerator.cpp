@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ranges>
 #include <errno.h>
+#include "logger.h"
 
 
 LogGenerator::LogGenerator(std::string fileName)
@@ -24,47 +25,32 @@ LogGenerator::~LogGenerator() {
     }
 }
 
-void LogGenerator::writeLog() {
-    long int bytesSize = 10000000000; // 10GB 
-    std::string randomString = randomStringGenerator(bytesSize);
-    
-    long int totalBytesWritten = 0;
-    
-    while (totalBytesWritten < static_cast<long int>(randomString.length())) {
-        
-        long int bytesRemaining = randomString.length() - totalBytesWritten;
+void LogGenerator::writeLog(size_t numberOfBlocks) {
 
-        ssize_t bytesWritten = write(_fd, randomString.c_str() + totalBytesWritten, bytesRemaining);
+    size_t blocksWritten = 0;
+
+    while (blocksWritten < numberOfBlocks){
+        Block randomBlock = Block();
+
+        size_t totalBytesWritten = 0;
         
-        if (bytesWritten == -1) {  
-            std::cout << "Failed to Write" << std::endl;
-            break; // Exit loop on a fatal write error
-        }
-        
-        totalBytesWritten += bytesWritten;
-        std::cout << "Successfully wrote total of " << bytesWritten << " bytes.\n";
-    } 
-    
-    std::cout << "Finished! Successfully wrote total of " << totalBytesWritten << " bytes.\n";
+        while (totalBytesWritten < randomBlock._blockSize) {
+            
+            long int bytesRemaining = randomBlock._blockSize - totalBytesWritten;
+
+            ssize_t bytesWritten = write(_fd, randomBlock._block.c_str() + totalBytesWritten, bytesRemaining);
+            
+            if (bytesWritten == -1) {  
+                std::cout << "Failed to Write" << std::endl;
+                break; // Exit loop on a fatal write error
+            }
+            
+            totalBytesWritten += bytesWritten;
+        } 
+        blocksWritten += 1;
+        LOG_INFO("Block Written: " + std::to_string(blocksWritten));
+    }
+
+    std::cout << "Finished! Successfully writing all Blocks";
     return;
-}
-
-
-std::string LogGenerator::randomStringGenerator(size_t _stringLength) {
-    static constexpr std::string_view characters = 
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<size_t> distribution(0, characters.size() - 1);
-
-    std::string randomStr;
-    randomStr.resize(_stringLength);
-
-    // Fill the string using a modern C++ view / generator approach
-    std::ranges::generate(randomStr, [&]() {
-        return characters[distribution(generator)];
-    });
-
-    return randomStr;
 }

@@ -6,18 +6,19 @@
 #include <unistd.h>
 #include <cstring>
 #include <cerrno>
+#include "Block.h"
 
 
 class LogGenerator{
     public:
         explicit LogGenerator(std::string _fileName);
-        void writeLog();
+        void writeLog(size_t numberOfBlocks);
         ~LogGenerator();
 
     private:
         std::string _fileName = "app.log";
-        int _stringLength = 10;
+        size_t numberOfBlocks = 10;
         int _fd;
         std::ofstream logFile_;
-        std::string randomStringGenerator(size_t _stringLength);
+        Block blockGenerator();
 };

@@ -6,7 +6,7 @@ CXXFLAGS = -std=c++20 -Wall -Wextra
 TARGET = logger
 
 # Define the source files and corresponding object files
-SRCS = main.cpp LogGenerator.cpp
+SRCS = main.cpp LogGenerator.cpp Block.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 # Default target when you just run 'make'
