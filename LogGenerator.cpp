@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include <ranges>
+#include <errno.h>
 
 
 LogGenerator::LogGenerator(std::string fileName)
@@ -9,7 +10,9 @@ LogGenerator::LogGenerator(std::string fileName)
     _fileName = fileName;
     _fd = open(_fileName.c_str(),O_WRONLY | O_CREAT | O_APPEND | O_SYNC,0644);
     if (_fd == -1){
-        std::cout << "File Not Found";
+        if (errno == EINTR){
+            std::cout << "File Not Found";
+        }
         return;
     }
 
@@ -33,7 +36,7 @@ void LogGenerator::writeLog() {
 
         ssize_t bytesWritten = write(_fd, randomString.c_str() + totalBytesWritten, bytesRemaining);
         
-        if (bytesWritten == -1) {
+        if (bytesWritten == -1) {  
             std::cout << "Failed to Write" << std::endl;
             break; // Exit loop on a fatal write error
         }
